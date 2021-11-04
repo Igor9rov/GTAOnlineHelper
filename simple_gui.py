@@ -6,6 +6,9 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QPushButton, QApplication, QMessageBox, QStyle
 
+NOT_CORRECT_PID = -1
+SECONDS_TO_SLEEP = 8
+
 
 class ButtonForPausingGTA(QPushButton):
     """Основное окно приложения. из одной кнопки, больше и не нужно"""
@@ -63,14 +66,14 @@ class WorkingThread(QThread):
         :return: None
         """
         pid = get_pid_with_name("gta5")
-        if pid == -1:
+        if pid == NOT_CORRECT_PID:
             self.error_signal.emit()
         else:
             # Ссылка на процесс с GTA 5
             gta_process = psutil.Process(pid)
             gta_process.suspend()
             # 8 секунд необходимо "висеть", чтобы всех выкинуло из сессии
-            time.sleep(8)
+            time.sleep(SECONDS_TO_SLEEP)
             gta_process.resume()
             
 
@@ -91,7 +94,7 @@ def get_pid_with_name(process_name: str) -> int:
         # Ожидаем следующее
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
-    return -1
+    return NOT_CORRECT_PID
 
 
 class ErrorMessageBox(QMessageBox):
